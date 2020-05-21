@@ -11,9 +11,9 @@
 
   <include file="$(find hector_mapping)/launch/mapping_default.launch">
     <arg name="scan_topic" default="vrep/scan"/>
-    <arg name="base_frame" default="base_link"/>
     <arg name="pub_map_odom_transform" default="false"/>
-    <arg name="map_size" default="2048"/>
+    <arg name="base_frame" default="base_link"/>
+    <param name="odom_frame" value="base_link" />
   </include>
 
   <include file="$(find hector_geotiff)/launch/geotiff_mapper.launch">
