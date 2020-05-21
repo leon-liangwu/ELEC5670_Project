@@ -2,6 +2,8 @@
 
 <launch>
 
+  <node pkg="laser_mapping" type="key_motion" name="key_motion" launch-prefix="xterm -e"/>
+
   <arg name="geotiff_map_file_path" default="$(find hector_geotiff)/maps"/>
 
   <param name="/use_sim_time" value="true"/>
