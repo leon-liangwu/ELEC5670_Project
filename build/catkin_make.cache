@@ -1,0 +1,2 @@
+laser_mapping
+-DCATKIN_DEVEL_PREFIX=/home/lwuat/Workspace/Courses/ELEC5670_Project/devel -DCMAKE_INSTALL_PREFIX=/home/lwuat/Workspace/Courses/ELEC5670_Project/install -G Unix Makefiles
