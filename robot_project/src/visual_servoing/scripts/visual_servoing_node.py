@@ -18,7 +18,7 @@ pub = rospy.Publisher('/vrep/cmd_vel', Twist, queue_size=10)
 pub_switch = rospy.Publisher('/vrep/laser_switch', Bool, queue_size=10)
 
 target_flag = False
-cur_room = 'Unknown'
+cur_room = 'D'
 
 def room_callback(data):
     global cur_room

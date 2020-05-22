@@ -50,11 +50,12 @@ def pos_callback(data):
         cur_area = 'B'
     
     if cur_area != pre_area:
-        room_msg = String()
-        room_msg.data = cur_area
-        pub3.publish(room_msg)
         rospy.loginfo("Robot enters in area %s" % cur_area)
         pre_area = cur_area
+        
+    room_msg = String()
+    room_msg.data = cur_area
+    pub3.publish(room_msg)
 
     last_pos = data
 
