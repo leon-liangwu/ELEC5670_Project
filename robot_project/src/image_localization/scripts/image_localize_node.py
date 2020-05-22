@@ -25,6 +25,7 @@ img_w = 512
 img_h = 512
 cam_ang = 45
 pix_ang = np.pi/4/512 
+box_thresh = 100
 
 last_img = None
 last_rects = None
@@ -83,6 +84,8 @@ def image_callback(data):
     for rect in rects:
         x1, y1 = (rect.left(), rect.top())
         x2, y2 = (rect.right(), rect.bottom())
+        if x2-x1 < box_thresh or y2-y1 < box_thresh:
+            continue
         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
     
     # cv2.imshow('img', img)
@@ -144,7 +147,7 @@ def scan_callback(data):
         rect_bottom = last_rect.bottom()
         face_rect = (rect_left, rect_top, rect_right-rect_left, rect_bottom-rect_top)
         # img_rect = image_bounding(last_img, face_rect)
-        if face_rect[2] < 100 or face_rect[3] < 100:
+        if face_rect[2] < box_thresh or face_rect[3] < box_thresh:
             # rospy.loginfo(('Image is too far. Go closer.', face_rect))
             continue
 
