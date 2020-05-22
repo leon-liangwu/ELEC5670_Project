@@ -7,6 +7,7 @@ import cv2
 import tf
 from sensor_msgs.msg import Image, LaserScan
 from geometry_msgs.msg import Twist
+from std_msgs.msg import String
 from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseStamped
 from cv_bridge import CvBridge, CvBridgeError
@@ -17,6 +18,12 @@ pub = rospy.Publisher('/vrep/cmd_vel', Twist, queue_size=10)
 pub_switch = rospy.Publisher('/vrep/laser_switch', Bool, queue_size=10)
 
 target_flag = False
+cur_room = 'Unknown'
+
+def room_callback(data):
+    global cur_room
+    cur_room = data.data
+
 
 def detect_ball(img, rgb):
     scale = 4
@@ -48,6 +55,8 @@ def detect_ball(img, rgb):
 
 def image_callback(data):
     global target_flag
+    if cur_room != 'D':
+        return 
     try:
         img = img_bridge.imgmsg_to_cv2(data, "bgr8")
     except CvBridgeError as e:
@@ -70,7 +79,7 @@ def image_callback(data):
             rospy.loginfo('Target is lost! Use key to control...')
             target_flag = False
             return
-        speed_factor =  0.4 * img.shape[1] / (target[2] + 0.01)
+        speed_factor =  0.3 * img.shape[1] / (target[2] + 0.01)
         angle_factor = (img.shape[1]*0.5 - target[0]) / (img.shape[1]/2)
         twist = Twist()
         twist.linear.x = np.min([speed_factor * 0.5, 0.8])
@@ -86,6 +95,7 @@ def main():
     rospy.init_node('visual_servoing', anonymous=True)
     rospy.loginfo(('Start Visual Servoing.'))
     rospy.Subscriber('/vrep/image', Image, image_callback)
+    rospy.Subscriber('/localize/room', String, room_callback)
 
     rospy.spin()
     

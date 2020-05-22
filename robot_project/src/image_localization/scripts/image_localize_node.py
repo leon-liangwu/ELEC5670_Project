@@ -18,6 +18,7 @@ img_bridge = CvBridge()
 
 pub1 = rospy.Publisher('/localize/image_flip', Image, queue_size=10)
 pub2 = rospy.Publisher('/localize/marker', MarkerArray, queue_size=10)
+pub3 = rospy.Publisher('/localize/room', String, queue_size=10)
 markerArray = MarkerArray()
 
 img_w = 512
@@ -28,6 +29,7 @@ pix_ang = np.pi/4/512
 last_img = None
 last_rects = None
 last_pos = None
+last_room = None
 
 area_div = [-3.6, -6.7, 5]
 pre_area = 'Unknown'
@@ -48,6 +50,9 @@ def pos_callback(data):
         cur_area = 'B'
     
     if cur_area != pre_area:
+        room_msg = String()
+        room_msg.data = cur_area
+        pub3.publish(room_msg)
         rospy.loginfo("Robot enters in area %s" % cur_area)
         pre_area = cur_area
 
