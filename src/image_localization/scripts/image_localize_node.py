@@ -29,11 +29,28 @@ last_img = None
 last_rects = None
 last_pos = None
 
+area_div = [-3.66, -6.7, 5]
+pre_area = 'Unknown'
+
 img_add_list = []
 
 def pos_callback(data):
-    global last_pos
+    global last_pos, pre_area
     # rospy.loginfo('pos callback')
+
+    if data.pose.position.x > area_div[2]:
+        cur_area = 'D'
+    elif data.pose.position.y > area_div[0]:
+        cur_area = 'A'
+    elif data.pose.position.y < area_div[1]:
+        cur_area = 'C'
+    else:
+        cur_area = 'B'
+    
+    if cur_area != pre_area:
+        rospy.loginfo("Robot enters in area %s" % cur_area)
+        pre_area = cur_area
+
     last_pos = data
 
 def image_callback(data):
@@ -197,6 +214,7 @@ def scan_callback(data):
 def main():
     
     rospy.init_node('image_localize', anonymous=True)
+    rospy.loginfo(('Start Robot Localization.'))
     rospy.Subscriber('/vrep/image', Image, image_callback)
     rospy.Subscriber('/vrep/scan', LaserScan, scan_callback)
     rospy.Subscriber('/slam_out_pose', PoseStamped, pos_callback)
