@@ -29,7 +29,7 @@ last_img = None
 last_rects = None
 last_pos = None
 
-area_div = [-3.66, -6.7, 5]
+area_div = [-3.6, -6.7, 5]
 pre_area = 'Unknown'
 
 img_add_list = []
@@ -208,7 +208,6 @@ def scan_callback(data):
             img_add_list[index_img-1][1] = markerArray.markers[index_img-1].pose.position.y
 
         pub2.publish(markerArray)
-
 
 
 def main():
