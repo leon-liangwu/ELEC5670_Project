@@ -33,7 +33,7 @@ img_add_list = []
 
 def pos_callback(data):
     global last_pos
-    rospy.loginfo('pos callback')
+    # rospy.loginfo('pos callback')
     last_pos = data
 
 def image_callback(data):
@@ -55,7 +55,7 @@ def image_callback(data):
         last_rects = None
     else:
         last_rects = rects
-        rospy.loginfo(('img callback', last_rects))
+        # rospy.loginfo(('img callback', last_rects))
     
     for rect in rects:
         x1, y1 = (rect.left(), rect.top())
@@ -82,6 +82,31 @@ def verify_image(pose, dist_thresh = 1.0):
     return None
 
 
+def image_bounding(img, face_rect):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ret, thresh = cv2.threshold(gray, 120, 255, cv2.THRESH_BINARY_INV)
+    binary, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+
+    max_rect = face_rect
+    center = (face_rect[0] + face_rect[2]/2, face_rect[1] + face_rect[3]/2)
+    if len(contours) > 0:
+        for cnt in contours:
+            if cv2.contourArea(cnt) < 50:
+                continue
+                
+            rect = cv2.boundingRect(cnt)
+            print(rect)
+
+            if center[0] > rect[0] and center[0] < rect[0] + rect[2] \
+                and center[1] > rect[1] and center[1] < rect[1] + rect[3]:
+                if rect[2] * rect[3] > max_rect[2] * max_rect[3]:
+                    max_rect = rect
+        
+        return max_rect
+
+    return None
+
+
 
 def scan_callback(data):
 
@@ -89,8 +114,18 @@ def scan_callback(data):
         return
     
     for last_rect in last_rects:
+        
         rect_left = last_rect.left()
         rect_right = last_rect.right()
+        rect_top = last_rect.top()
+        rect_bottom = last_rect.bottom()
+        face_rect = (rect_left, rect_top, rect_right-rect_left, rect_bottom-rect_top)
+        # img_rect = image_bounding(last_img, face_rect)
+        if face_rect[2] < 100 or face_rect[3] < 100:
+            # rospy.loginfo(('Image is too far. Go closer.', face_rect))
+            continue
+
+
         angle_range = ((rect_left-img_w/2)*pix_ang + np.pi/2, (rect_right-img_w/2)*pix_ang + np.pi/2)
 
         las_ang_min = data.angle_min
@@ -102,8 +137,8 @@ def scan_callback(data):
                     int((angle_range[0]-las_ang_min) / las_ang_inc))
 
         img_range = np.array(data.ranges[index_range[0]:index_range[1]+1]).mean()
-        rospy.loginfo((las_len, las_ang_min, las_ang_max, 
-                        angle_range, las_ang_inc, index_range, img_range))
+        # rospy.loginfo((las_len, las_ang_min, las_ang_max, 
+        #                 angle_range, las_ang_inc, index_range, img_range))
         
         robot_pos = last_pos.pose.position
         robot_rot = last_pos.pose.orientation
@@ -128,7 +163,7 @@ def scan_callback(data):
         if index_img is None:
             img_add_list.append(pos_marker)
 
-            rospy.loginfo((img_ang, robot_euler, pos_marker))
+            # rospy.loginfo((img_ang, robot_euler, pos_marker))
             # pos_marker = [robot_pos.x, robot_pos.y]
             marker = Marker()
             marker.header.frame_id = '/map'
@@ -146,13 +181,14 @@ def scan_callback(data):
             marker.pose.orientation.w = 1.0
             marker.pose.position.x = pos_marker[0]
             marker.pose.position.y = pos_marker[1]
-
             markerArray.markers.append(marker)
+            rospy.loginfo(('Marked one image with id: %d' %  marker.id))
         else:
-            marker.pose.position.x = 0.8*pos_marker[0] + 0.2*img_add_list[index_img-1][0]
-            marker.pose.position.y = 0.8*pos_marker[1] + 0.2*img_add_list[index_img-1][1]
-            img_add_list[index_img-1][0] = marker.pose.position.x
-            img_add_list[index_img-1][1] = marker.pose.position.y
+            # marker = markerArray.markers[index_img-1]
+            markerArray.markers[index_img-1].pose.position.x = 0.8*pos_marker[0] + 0.2*img_add_list[index_img-1][0]
+            markerArray.markers[index_img-1].pose.position.y = 0.8*pos_marker[1] + 0.2*img_add_list[index_img-1][1]
+            img_add_list[index_img-1][0] = markerArray.markers[index_img-1].pose.position.x
+            img_add_list[index_img-1][1] = markerArray.markers[index_img-1].pose.position.y
 
         pub2.publish(markerArray)
 
