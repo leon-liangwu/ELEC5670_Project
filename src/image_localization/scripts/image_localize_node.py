@@ -29,7 +29,7 @@ last_img = None
 last_rects = None
 last_pos = None
 
-face_ids = []
+img_add_list = []
 
 def pos_callback(data):
     global last_pos
@@ -74,6 +74,15 @@ def image_callback(data):
     pub1.publish(img_flip)
 
 
+def verify_image(pose, dist_thresh = 1.0):
+    for i, pos_added in enumerate(img_add_list):
+        dist = np.sum((pose - pos_added)**2)**0.5
+        if dist < dist_thresh:
+            return i+1
+    return None
+
+
+
 def scan_callback(data):
 
     if (last_rects is None) or (last_pos is None):
@@ -115,26 +124,36 @@ def scan_callback(data):
         pos_marker = np.dot(np.dot(R_i2r, R_r2o), np.array([[0], [-1*img_range], [0], [1]]))
 
         pos_marker = pos_marker[0:2] + np.array([[robot_pos.x], [robot_pos.y]])
-        rospy.loginfo((img_ang, robot_euler, pos_marker))
-        # pos_marker = [robot_pos.x, robot_pos.y]
-        marker = Marker()
-        marker.header.frame_id = '/map'
-        marker.id = 1
-        marker.ns = 'images'
-        marker.type = marker.SPHERE
-        marker.action = marker.ADD
-        marker.scale.x = 0.5
-        marker.scale.y = 0.5
-        marker.scale.z = 0.5
-        marker.color.a = 1.0
-        marker.color.r = 1.0
-        marker.color.g = 0.0
-        marker.color.b = 0.0
-        marker.pose.orientation.w = 1.0
-        marker.pose.position.x = pos_marker[0]
-        marker.pose.position.y = pos_marker[1]
+        index_img = verify_image(pos_marker)
+        if index_img is None:
+            img_add_list.append(pos_marker)
 
-        markerArray.markers.append(marker)
+            rospy.loginfo((img_ang, robot_euler, pos_marker))
+            # pos_marker = [robot_pos.x, robot_pos.y]
+            marker = Marker()
+            marker.header.frame_id = '/map'
+            marker.id = len(img_add_list)
+            marker.ns = 'images'
+            marker.type = marker.SPHERE
+            marker.action = marker.ADD
+            marker.scale.x = 0.5
+            marker.scale.y = 0.5
+            marker.scale.z = 0.5
+            marker.color.a = 1.0
+            marker.color.r = 1.0
+            marker.color.g = 0.0
+            marker.color.b = 0.0
+            marker.pose.orientation.w = 1.0
+            marker.pose.position.x = pos_marker[0]
+            marker.pose.position.y = pos_marker[1]
+
+            markerArray.markers.append(marker)
+        else:
+            marker.pose.position.x = 0.8*pos_marker[0] + 0.2*img_add_list[index_img-1][0]
+            marker.pose.position.y = 0.8*pos_marker[1] + 0.2*img_add_list[index_img-1][1]
+            img_add_list[index_img-1][0] = marker.pose.position.x
+            img_add_list[index_img-1][1] = marker.pose.position.y
+
         pub2.publish(markerArray)
 
 
