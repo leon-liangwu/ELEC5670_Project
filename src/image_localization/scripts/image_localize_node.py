@@ -101,17 +101,18 @@ def scan_callback(data):
 
         robot_euler = tf.transformations.euler_from_quaternion((robot_rot.x, robot_rot.y, 
                                                                 robot_rot.z, robot_rot.w))
-        img_ang = np.mean(angle_range)
+        img_ang = np.pi/2- np.mean(angle_range)
         img_quat = tf.transformations.quaternion_from_euler(0, 0, img_ang)
 
         
 
-        R_i2r = tf.transformations.quaternion_matrix((robot_rot.x, robot_rot.y, 
+        R_r2o = tf.transformations.quaternion_matrix((robot_rot.x, robot_rot.y, 
                                                         robot_rot.z, robot_rot.w))
-        R_r2o = tf.transformations.quaternion_matrix(img_quat)                                                
+        R_i2r = tf.transformations.quaternion_matrix(img_quat)                                                
         
 
-        pos_marker = np.dot(np.linalg.inv(np.dot(R_i2r, R_r2o)), np.array([[img_range], [0], [0], [1]]))
+        # pos_marker = np.dot(np.linalg.inv(np.dot(R_i2r, R_r2o)), np.array([[img_range], [0], [0], [1]]))
+        pos_marker = np.dot(np.dot(R_i2r, R_r2o), np.array([[0], [-1*img_range], [0], [1]]))
 
         pos_marker = pos_marker[0:2] + np.array([[robot_pos.x], [robot_pos.y]])
         rospy.loginfo((img_ang, robot_euler, pos_marker))
@@ -122,12 +123,12 @@ def scan_callback(data):
         marker.ns = 'images'
         marker.type = marker.SPHERE
         marker.action = marker.ADD
-        marker.scale.x = 0.2
-        marker.scale.y = 0.2
-        marker.scale.z = 0.2
+        marker.scale.x = 0.5
+        marker.scale.y = 0.5
+        marker.scale.z = 0.5
         marker.color.a = 1.0
         marker.color.r = 1.0
-        marker.color.g = 1.0
+        marker.color.g = 0.0
         marker.color.b = 0.0
         marker.pose.orientation.w = 1.0
         marker.pose.position.x = pos_marker[0]
