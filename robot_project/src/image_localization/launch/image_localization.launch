@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node pkg="image_localization" type="image_localize_node.py" name="image_localize" output="screen"/>
+
+</launch>

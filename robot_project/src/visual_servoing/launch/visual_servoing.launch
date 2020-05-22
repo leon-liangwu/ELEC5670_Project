@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node pkg="visual_servoing" type="visual_servoing_node.py" name="visual_servoing" output="screen" />
+
+</launch>

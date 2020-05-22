@@ -58,18 +58,19 @@ def image_callback(data):
     target = detect_ball(img, rgb)
 
     if (target is not None) and target[2] > 100 and (not target_flag):
+        target_flag = True
+        rospy.loginfo('Target is detected. Start auto-tracking...')
         scan_switch = Bool()
         scan_switch.data = False
         pub_switch.publish(scan_switch)
-        target_flag = True
-        rospy.loginfo('Target is detected. Start auto-tracking...')
+        rospy.loginfo('Laser switch OFF')
     
     if target_flag:
         if target is None:
             rospy.loginfo('Target is lost! Use key to control...')
             target_flag = False
             return
-        speed_factor =  0.4 * img.shape[1] / target[2]
+        speed_factor =  0.4 * img.shape[1] / (target[2] + 0.01)
         angle_factor = (img.shape[1]*0.5 - target[0]) / (img.shape[1]/2)
         twist = Twist()
         twist.linear.x = np.min([speed_factor * 0.5, 0.8])
@@ -82,13 +83,12 @@ def image_callback(data):
 
 def main():
     
-    rospy.init_node('ball_follow', anonymous=True)
+    rospy.init_node('visual_servoing', anonymous=True)
     rospy.loginfo(('Start Visual Servoing.'))
     rospy.Subscriber('/vrep/image', Image, image_callback)
 
     rospy.spin()
     
-
 
 if __name__ == '__main__':
     try:

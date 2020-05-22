@@ -79,8 +79,8 @@ def image_callback(data):
         x2, y2 = (rect.right(), rect.bottom())
         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
     
-    cv2.imshow('img', img)
-    cv2.waitKey(10)
+    # cv2.imshow('img', img)
+    # cv2.waitKey(10)
 
     try:
         img_flip = img_bridge.cv2_to_imgmsg(img, "bgr8")
