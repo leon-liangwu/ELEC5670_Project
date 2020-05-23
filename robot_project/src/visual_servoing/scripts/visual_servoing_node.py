@@ -26,9 +26,9 @@ def room_callback(data):
 
 
 def detect_ball(img, rgb):
-    scale = 4
+    scale = 8
     (rows, cols, ch) = img.shape
-    img_rs = cv2.resize(img, (rows/4, cols/4))
+    img_rs = cv2.resize(img, (rows/scale, cols/scale))
     xy_list = []
     (rows, cols, ch) = img_rs.shape
     bgr = rgb[::-1]
@@ -46,11 +46,10 @@ def detect_ball(img, rgb):
             xy_array[:, 0].max(),
             xy_array[:, 1].max()]
 
-    # rospy.loginfo(rect)
-
+    # rospy.loginfo(rect) 
     cv2.rectangle(img, (rect[0]*scale, rect[1]*scale), (rect[2]*scale, rect[3]*scale), (0, 255, 0), 2)
     target = np.array([(rect[0]+rect[2])*0.5, (rect[1]+rect[3])*0.5, rect[2]-rect[0], rect[3]-rect[1]])*scale
-
+    
     return target
 
 def image_callback(data):
@@ -66,6 +65,9 @@ def image_callback(data):
     rgb = np.array([255, 255, 0])
     target = detect_ball(img, rgb)
 
+    # cv2.imshow('img_ball', img)
+    # cv2.waitKey(10)
+
     if (target is not None) and target[2] > 100 and (not target_flag):
         target_flag = True
         rospy.loginfo('Target is detected. Start auto-tracking...')
@@ -79,16 +81,14 @@ def image_callback(data):
             rospy.loginfo('Target is lost! Use key to control...')
             target_flag = False
             return
-        speed_factor =  0.3 * img.shape[1] / (target[2] + 0.01)
         angle_factor = (img.shape[1]*0.5 - target[0]) / (img.shape[1]/2)
+        speed_factor =  0.4 * (img.shape[1] / (target[2] + 0.01)) * (1-np.abs(angle_factor))
         twist = Twist()
         twist.linear.x = np.min([speed_factor * 0.5, 0.8])
         twist.angular.z = angle_factor * 1.0
         pub.publish(twist)
 
 
-    # cv2.imshow('img_ball', img)
-    # cv2.waitKey(10)
 
 def main():
     

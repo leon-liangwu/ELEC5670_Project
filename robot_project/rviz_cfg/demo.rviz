@@ -102,7 +102,7 @@ Visualization Manager:
       Marker Topic: /localize/marker
       Name: MarkerArray
       Namespaces:
-        {}
+        images: true
       Queue Size: 100
       Value: true
     - Class: rviz/Image
@@ -149,8 +149,8 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.19096458
-        Y: -6.58337641
+        X: -0.0831211805
+        Y: -6.68473768
         Z: 1.90734863e-06
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007

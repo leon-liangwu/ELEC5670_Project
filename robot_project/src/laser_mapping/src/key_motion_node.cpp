@@ -169,7 +169,7 @@ private:
 TeleopTurtle::TeleopTurtle():
   linear_(0),
   angular_(0),
-  l_scale_(0.8),
+  l_scale_(1.0),
   a_scale_(1.0)
 {
   nh_.param("scale_angular", a_scale_, a_scale_);
