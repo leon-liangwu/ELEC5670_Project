@@ -12,7 +12,7 @@
 
 
 ```bash
-cd code/robot_project
+cd ./robot_project
 tree -L 2
 .
 ├── launch
@@ -35,7 +35,7 @@ roscore
 cd $VREP_dir 
 ./vrep.sh
 # terminal 3 run all with one laucn file
-cd code/robot_project
+cd ./robot_project
 catkin_make
 roslaunch launch/final_project.launch
 ```
