@@ -48,6 +48,3 @@ There are three ROS nodes in this project: *laser_mapping*, *image_localization*
 2. in node *image_localization*, the robot detects and localize the images on the wall and mark them in the rviz, and also this node checks which area the robot enters in,
 3. in node *visual_servoing*, it detects the yellow moving ball and if it occurs, it will switch from key controlling mode to auto tracking mode, and simultaneously the laser scan sensor turns off.
 
-
-
-
